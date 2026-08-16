@@ -80,6 +80,27 @@
   }
 }
 
+/* Mochi's blink. Plain CSS so it costs nothing with several on screen. */
+.mochi-blink {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mochi-blink 5.2s ease-in-out infinite;
+}
+
+@keyframes mochi-blink {
+  0%,
+  91%,
+  100% {
+    transform: scaleY(1);
+  }
+  94% {
+    transform: scaleY(0.08);
+  }
+  97% {
+    transform: scaleY(1);
+  }
+}
+
 /* ---------------------------------------------------------------
    Base
    --------------------------------------------------------------- */
@@ -165,6 +186,25 @@ html[data-calm='true'] *::after {
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+/* Keyboard users get to jump the nav; everyone else never sees this. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 80;
+}
+
+.skip-link:focus-visible {
+  left: 1rem;
+  top: 1rem;
+  background: var(--color-paper);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-lift);
+  padding: 0.6rem 1.1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 /* Gentle scrollbars so long lists don't feel harsh */
