@@ -1,0 +1,108 @@
+import type { OrganizeResult } from '../types'
+import { organizeLocally } from './localOrganizer'
+
+/**
+ * The one entry point the UI uses to turn a brain dump into structure.
+ *
+ * Order of attempts:
+ *   1. the local proxy (which holds the API key, if one is configured)
+ *   2. the built-in offline organiser
+ *
+ * Step 2 is not an error path. Most people running this repo will have no
+ * key, and the product has to feel finished for them too.
+ */
+
+export type AiMode = 'checking' | 'model' | 'local'
+
+export interface AiStatus {
+  mode: AiMode
+  provider: string
+  model: string | null
+}
+
+export async function fetchAiStatus(): Promise<AiStatus> {
+  try {
+    const res = await fetch('/api/status', { signal: AbortSignal.timeout(2500) })
+    if (!res.ok) throw new Error('bad status')
+    const data = await res.json()
+    return {
+      mode: data.configured ? 'model' : 'local',
+      provider: data.provider ?? 'local',
+      model: data.model ?? null,
+    }
+  } catch {
+    // The API process isn't running (or someone is serving the built
+    // frontend on its own). Local mode, no drama.
+    return { mode: 'local', provider: 'local', model: null }
+  }
+}
+
+export async function organizeDump(text: string): Promise<OrganizeResult> {
+  const supportNote = safetyNoteFor(text)
+
+  try {
+    const res = await fetch('/api/organize', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ text }),
+      signal: AbortSignal.timeout(25_000),
+    })
+
+    if (res.ok) {
+      const data = await res.json()
+      if (data?.ok && Array.isArray(data.items) && data.items.length > 0) {
+        return {
+          summary: data.summary,
+          items: data.items,
+          recommended_focus: data.recommended_focus,
+          source: data.source ?? 'local',
+          supportNote,
+        }
+      }
+    }
+  } catch {
+    // Timeout, offline, server down — all handled the same way.
+  }
+
+  return { ...organizeLocally(text), supportNote }
+}
+
+/* ------------------------------------------------------------------ */
+/* Safety                                                              */
+/*                                                                     */
+/* UNLOAD organises tasks. It is not a therapist and must never behave */
+/* like one. This check does exactly one thing: if a dump contains      */
+/* language about self-harm, the app stops pretending a to-do list is   */
+/* the right response and points toward an actual human. It does not    */
+/* diagnose, score, label, or store anything.                          */
+/* ------------------------------------------------------------------ */
+
+const CRISIS_PHRASES = [
+  'kill myself',
+  'killing myself',
+  'end my life',
+  'ending my life',
+  'take my own life',
+  'want to die',
+  'wish i was dead',
+  'wish i were dead',
+  'better off dead',
+  'suicidal',
+  'suicide',
+  'self harm',
+  'self-harm',
+  'harm myself',
+  'hurt myself',
+  'cut myself',
+  'no reason to live',
+  "don't want to be here anymore",
+  'dont want to be here anymore',
+]
+
+export const SUPPORT_NOTE =
+  'Some of what you wrote sounds heavier than a to-do list. UNLOAD is a small desk tool, not a substitute for a person — please consider talking to someone you trust, your GP or student wellbeing service, or a local crisis line. In the US and Canada you can call or text 988; in the UK and Ireland, call 116 123. If you are in immediate danger, please contact emergency services.'
+
+export function safetyNoteFor(text: string): string | undefined {
+  const lower = ` ${text.toLowerCase().replace(/\s+/g, ' ')} `
+  return CRISIS_PHRASES.some((phrase) => lower.includes(phrase)) ? SUPPORT_NOTE : undefined
+}
