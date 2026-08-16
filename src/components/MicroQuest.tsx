@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 
 import { Button, SectionLabel, Sheet } from './ui'
 import { QUESTS, suggestQuest, type Quest } from '../data/quests'
@@ -53,12 +53,14 @@ export function MicroQuest() {
   }
 
   return (
+    // The picker/runner swap is a plain conditional, not an AnimatePresence
+    // exit-then-enter: waiting on an exit animation to hand over is one more
+    // thing that can wedge, and a modal that ignores "Accept" is unforgivable.
     <Sheet open={visible} onClose={close} labelledBy="quest-title" dismissible={!active}>
-      <AnimatePresence mode="wait">
-        {active ? (
-          <QuestRunner key={active.id} quest={active} onQuit={() => setActive(null)} onDone={completeQuest} />
-        ) : (
-          <motion.div key="pick" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+      {active ? (
+        <QuestRunner key={active.id} quest={active} onQuit={() => setActive(null)} onDone={completeQuest} />
+      ) : (
+        <motion.div key="pick" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <h2 id="quest-title" className="font-display text-3xl leading-tight">
               Micro quest
             </h2>
@@ -97,6 +99,7 @@ export function MicroQuest() {
                     <li key={quest.id}>
                       <button
                         onClick={() => setActive(quest)}
+                        aria-label={`Start quest: ${quest.title}. ${quest.instruction}`}
                         className="hover:bg-cream-deep/50 flex w-full items-center gap-4 rounded-3xl border-2 border-transparent px-4 py-3.5 text-left transition-all hover:border-[color:var(--color-cream-deep)]"
                       >
                         <span className="text-2xl" aria-hidden="true">
@@ -116,9 +119,8 @@ export function MicroQuest() {
                 </Button>
               </>
             )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </motion.div>
+      )}
     </Sheet>
   )
 }

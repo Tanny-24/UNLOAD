@@ -26,26 +26,28 @@ export function MicroBreak() {
   }, [visible])
 
   return (
+    // Plain conditional rather than an AnimatePresence exit-then-enter: the
+    // handover is one more thing that can wedge, and a break that refuses to
+    // start is worse than one that doesn't cross-fade.
     <Sheet open={visible} onClose={close} labelledBy="break-title" dismissible={!chosen}>
-      <AnimatePresence mode="wait">
-        {chosen ? (
-          <BreakRunner
-            key={chosen.id}
-            plan={chosen}
-            reducedMotion={settings.reducedMotion}
-            onQuit={() => setChosen(null)}
-            onDone={() => {
-              markReset()
-              reward({ mind: 1, body: 1, xp: 6 }, 'break')
-              open({
-                kind: 'reward',
-                title: 'Reset complete',
-                lines: [`${chosen.title} — done.`, 'Nothing else is required of you right now.'],
-              })
-            }}
-          />
-        ) : (
-          <motion.div key="pick" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+      {chosen ? (
+        <BreakRunner
+          key={chosen.id}
+          plan={chosen}
+          reducedMotion={settings.reducedMotion}
+          onQuit={() => setChosen(null)}
+          onDone={() => {
+            markReset()
+            reward({ mind: 1, body: 1, xp: 6 }, 'break')
+            open({
+              kind: 'reward',
+              title: 'Reset complete',
+              lines: [`${chosen.title} — done.`, 'Nothing else is required of you right now.'],
+            })
+          }}
+        />
+      ) : (
+        <motion.div key="pick" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <h2 id="break-title" className="font-display text-3xl leading-tight">
               Take a tiny break
             </h2>
@@ -56,6 +58,7 @@ export function MicroBreak() {
                 <li key={item.id}>
                   <button
                     onClick={() => setChosen(item)}
+                    aria-label={`Start ${item.title}, ${item.seconds} seconds. ${item.blurb}`}
                     className="hover:bg-cream-deep/50 border-cream-deep flex w-full items-center gap-4 rounded-3xl border-2 border-transparent px-4 py-3.5 text-left transition-all hover:border-[color:var(--color-cream-deep)]"
                   >
                     <span className="text-2xl" aria-hidden="true">
@@ -74,9 +77,8 @@ export function MicroBreak() {
             <Button variant="ghost" block className="mt-5" onClick={close}>
               Not now
             </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </motion.div>
+      )}
     </Sheet>
   )
 }
@@ -92,37 +94,37 @@ function BreakRunner({
   onQuit: () => void
   reducedMotion: boolean
 }) {
-  const [stepIndex, setStepIndex] = useState(0)
-  const [remaining, setRemaining] = useState(plan.steps[0].seconds)
+  // A single elapsed counter, with the current step derived from it. Keeping
+  // the only piece of state a pure increment means StrictMode's double
+  // invocation can't skip a step or fire completion twice.
+  const [elapsed, setElapsed] = useState(0)
   const doneRef = useRef(false)
 
   // Picked once per run so the line doesn't change under the reader.
   const quote = useMemo(() => CALM_QUOTES[Math.floor(Math.random() * CALM_QUOTES.length)], [])
 
-  const step = plan.steps[stepIndex]
   const totalSeconds = plan.steps.reduce((sum, s) => sum + s.seconds, 0)
-  const elapsed = plan.steps.slice(0, stepIndex).reduce((sum, s) => sum + s.seconds, 0) + (step.seconds - remaining)
+
+  let stepIndex = 0
+  let intoStep = elapsed
+  while (stepIndex < plan.steps.length - 1 && intoStep >= plan.steps[stepIndex].seconds) {
+    intoStep -= plan.steps[stepIndex].seconds
+    stepIndex += 1
+  }
+  const step = plan.steps[stepIndex]
+  const remaining = Math.max(0, step.seconds - intoStep)
 
   useEffect(() => {
-    const id = window.setInterval(() => {
-      setRemaining((r) => {
-        if (r > 1) return r - 1
-        setStepIndex((i) => {
-          if (i + 1 < plan.steps.length) {
-            setRemaining(plan.steps[i + 1].seconds)
-            return i + 1
-          }
-          if (!doneRef.current) {
-            doneRef.current = true
-            window.setTimeout(onDone, 350)
-          }
-          return i
-        })
-        return 0
-      })
-    }, 1000)
+    const id = window.setInterval(() => setElapsed((e) => e + 1), 1000)
     return () => window.clearInterval(id)
-  }, [plan, onDone])
+  }, [])
+
+  useEffect(() => {
+    if (elapsed < totalSeconds || doneRef.current) return
+    doneRef.current = true
+    const t = window.setTimeout(onDone, 350)
+    return () => window.clearTimeout(t)
+  }, [elapsed, totalSeconds, onDone])
 
   const scale = reducedMotion ? 1 : step.motion === 'in' ? 1.25 : step.motion === 'out' ? 0.8 : step.motion === 'hold' ? 1.12 : 1
 

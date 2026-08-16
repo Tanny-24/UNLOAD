@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useEffect, useRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
 
 /** Small shared primitives. Everything cozy-shaped and large enough to hit. */
@@ -101,6 +101,13 @@ export function Sheet({
 }) {
   const panelRef = useRef<HTMLDivElement>(null)
   const restoreTo = useRef<Element | null>(null)
+  /**
+   * Only a click that *starts* on the backdrop should dismiss. Otherwise
+   * releasing the mouse outside the panel — after dragging to select text,
+   * or after the panel resized under the cursor — closes the sheet and
+   * throws away whatever the person was doing.
+   */
+  const pressedBackdrop = useRef(false)
 
   useEffect(() => {
     if (!open) return
@@ -150,38 +157,57 @@ export function Sheet({
     }
   }, [open, onClose, dismissible])
 
+  if (!open) return null
+
   return (
-    <AnimatePresence>
-      {open && (
+    /**
+     * Deliberately no exit animation, and therefore no <AnimatePresence>.
+     *
+     * An exit animation keeps the old panel mounted until its animation
+     * reports completion — and rAF-driven animations stall whenever the
+     * window is occluded or backgrounded. When one flow hands over to the
+     * next (quest → reward), a stalled exit leaves two dialogs stacked on
+     * screen and the app looks broken. Opening is where the polish is
+     * noticed anyway; closing just needs to be instant and certain.
+     */
+    <>
+      <motion.div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.18 }}
+      >
+        {/* Tint only, deliberately no backdrop-blur: compositing a blur over
+            the large soft-focus background blobs is expensive enough to make
+            opening hesitate, and a modal that hesitates feels broken. */}
+        <div
+          className="absolute inset-0 bg-[#2b211a]/40"
+          onPointerDown={(e) => {
+            pressedBackdrop.current = e.target === e.currentTarget
+          }}
+          onClick={(e) => {
+            if (!dismissible) return
+            if (e.target !== e.currentTarget || !pressedBackdrop.current) return
+            pressedBackdrop.current = false
+            onClose()
+          }}
+          aria-hidden="true"
+        />
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={labelledBy}
+          tabIndex={-1}
+          className={`card relative max-h-[92vh] w-full overflow-y-auto p-7 shadow-[var(--shadow-lift)] outline-none sm:p-9 ${width}`}
+          initial={{ opacity: 0, y: 28, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 320, damping: 30 }}
         >
-          <div
-            className="absolute inset-0 bg-[#2b211a]/35 backdrop-blur-[3px]"
-            onClick={dismissible ? onClose : undefined}
-            aria-hidden="true"
-          />
-          <motion.div
-            ref={panelRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={labelledBy}
-            tabIndex={-1}
-            className={`card relative max-h-[92vh] w-full overflow-y-auto p-7 shadow-[var(--shadow-lift)] outline-none sm:p-9 ${width}`}
-            initial={{ opacity: 0, y: 28, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 16, scale: 0.97 }}
-            transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-          >
-            {children}
-          </motion.div>
+          {children}
         </motion.div>
-      )}
-    </AnimatePresence>
+      </motion.div>
+    </>
   )
 }
 

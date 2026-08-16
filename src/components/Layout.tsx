@@ -11,17 +11,24 @@ const LINKS = [
   { to: '/settings', label: 'Settings' },
 ]
 
-/** Soft drifting colour behind everything. Purely decorative. */
+/**
+ * Soft drifting colour behind everything. Purely decorative.
+ *
+ * Each blob is promoted to its own compositor layer so the (expensive) blur
+ * is rasterised once and the drift is a pure transform after that.
+ */
 function Backdrop() {
+  const blob = 'absolute rounded-full blur-[90px] animate-drift [will-change:transform] [transform:translateZ(0)]'
+
   return (
     <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
-      <div className="bg-peach-soft/45 animate-drift absolute -top-40 -left-32 h-[34rem] w-[34rem] rounded-full blur-[110px]" />
+      <div className={`${blob} bg-peach-soft/45 -top-40 -left-32 h-[34rem] w-[34rem]`} />
       <div
-        className="bg-lilac-soft/45 animate-drift absolute -right-40 top-20 h-[30rem] w-[30rem] rounded-full blur-[110px]"
+        className={`${blob} bg-lilac-soft/45 top-20 -right-40 h-[30rem] w-[30rem]`}
         style={{ animationDelay: '-8s' }}
       />
       <div
-        className="bg-mint-soft/40 animate-drift absolute -bottom-52 left-1/3 h-[28rem] w-[28rem] rounded-full blur-[110px]"
+        className={`${blob} bg-mint-soft/40 -bottom-52 left-1/3 h-[28rem] w-[28rem]`}
         style={{ animationDelay: '-15s' }}
       />
     </div>
@@ -29,8 +36,12 @@ function Backdrop() {
 }
 
 export function Layout({ children }: { children: ReactNode }) {
-  const { aiStatus, settings, session } = useStore()
+  const { aiStatus, settings, session, interruption } = useStore()
   const location = useLocation()
+
+  // While an overlay is up the page behind it is fully inert, so tab order
+  // and screen-reader focus stay inside the dialog.
+  const blocked = interruption.kind !== 'closed'
 
   return (
     <>
@@ -40,7 +51,7 @@ export function Layout({ children }: { children: ReactNode }) {
         Skip to content
       </a>
 
-      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 sm:px-8">
+      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 sm:px-8" inert={blocked || undefined}>
         <header className="flex flex-wrap items-center justify-between gap-4 py-6">
           <div className="flex items-baseline gap-3">
             <span className="font-display text-2xl tracking-tight">UNLOAD</span>
