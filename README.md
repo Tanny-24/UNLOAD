@@ -281,7 +281,7 @@ computed, not faked.
 
 | Profile | What it simulates |
 |---|---|
-| **55 minutes deep** | A long unbroken stretch. Scores ~71 → Mochi appears. |
+| **55 minutes deep** | A long unbroken stretch. Scores in the mid-70s → Mochi appears. |
 | **Type, delete, repeat** | Bursts separated by stalls — the shape of being stuck. |
 | **Staring at the screen** | A long session that quietly stopped producing anything. |
 | **Just sat down** | Everything clear — proves UNLOAD stays quiet when it should. |
@@ -289,14 +289,18 @@ computed, not faked.
 ### The two-minute demo
 
 1. Open UNLOAD. Dashboard, companion, privacy note.
-2. **Settings → 55 minutes deep.** Mochi appears: *"Hey… brain buffering?"*
-3. Click **🧠 Unload**. Type:
+2. **Focus → "Finish assignment" → Start.** Timer running.
+3. **Settings → 55 minutes deep.** You land back in Focus and Mochi appears
+   over it: *"Hey… brain buffering?"*
+4. Click **🧠 Unload**. Type:
    *"I need to finish my assignment, reply to my professor, study for tomorrow's exam and buy groceries."*
-4. **Unload my brain.** → FOCUS NOW: *Study for tomorrow's exam*, everything else parked.
-5. **Focus on "…"** → focus mode with the timer running.
-6. Click **I'm stuck** → Mochi returns → **🎮 Micro quest**.
-7. Accept **Yoda Reset**, hold for 15 seconds, **Mark complete**.
-8. **QUEST COMPLETE ✓** — mind, body and XP tick up.
+5. **Unload my brain.** → FOCUS NOW: *Study for tomorrow's exam*, everything else parked.
+6. **Back to focus.**
+7. Click **I'm stuck** → Mochi returns → **🎮 Micro quest**.
+8. Accept **Yoda Reset**, hold for 15 seconds, **Mark complete**.
+9. **Quest complete ✓** — mind, body and XP tick up.
+
+Under two minutes, and every step works with no API key and no network.
 
 Keyboard shortcuts: `⌘/Ctrl+Shift+U` unload · `⌘/Ctrl+Shift+K` call Mochi ·
 `⌘/Ctrl+Shift+F` focus mode.

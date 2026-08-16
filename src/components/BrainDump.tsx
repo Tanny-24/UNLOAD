@@ -50,6 +50,10 @@ export function BrainDump() {
           ...(result.supportNote ? [result.supportNote] : []),
         ],
       })
+      // Clear it here rather than leaving 'thinking' behind for the reopen
+      // effect to mop up — otherwise the next unload flashes the spinner.
+      setState('idle')
+      setText('')
     } catch {
       // organizeDump already falls back internally; reaching here means
       // something genuinely unexpected happened.
