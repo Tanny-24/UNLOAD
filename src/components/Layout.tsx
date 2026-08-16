@@ -39,9 +39,11 @@ export function Layout({ children }: { children: ReactNode }) {
   const { aiStatus, settings, session, interruption } = useStore()
   const location = useLocation()
 
-  // While an overlay is up the page behind it is fully inert, so tab order
-  // and screen-reader focus stay inside the dialog.
-  const blocked = interruption.kind !== 'closed'
+  // While a *modal* is up the page behind it is inert, so tab order and
+  // screen-reader focus stay inside the dialog. Mochi's nudge is explicitly
+  // excluded: it is a companion speaking, not a dialog, and it must never
+  // stop you carrying on with what you were doing.
+  const blocked = interruption.kind !== 'closed' && interruption.kind !== 'companion'
 
   return (
     <>

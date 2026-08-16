@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 
 import { Button, SectionLabel, Sheet } from './ui'
+import { Companion } from './Companion'
+import { QUEST_INTRO, RESET_DONE } from '../data/messages'
 import { QUESTS, suggestQuest, type Quest } from '../data/quests'
 import { useStore } from '../state/store'
 
@@ -21,7 +23,7 @@ const ACCENT_FILL: Record<string, string> = {
  * None of them need a camera or leave the room.
  */
 export function MicroQuest() {
-  const { interruption, close, open, reward, markReset, addItem } = useStore()
+  const { interruption, close, open, reward, markReset, addItem, settings } = useStore()
   const visible = interruption.kind === 'quest'
 
   const [active, setActive] = useState<Quest | null>(null)
@@ -41,9 +43,11 @@ export function MicroQuest() {
     reward(quest.reward, 'quest')
     if (note?.trim()) addItem(note.trim())
 
+    const cheer = RESET_DONE[settings.personality]
     open({
       kind: 'reward',
       title: 'Quest complete',
+      mochiLine: cheer[Math.floor(Math.random() * cheer.length)],
       lines: [
         quest.title,
         ...(note?.trim() ? [`Parked: "${note.trim()}"`] : []),
@@ -61,10 +65,18 @@ export function MicroQuest() {
         <QuestRunner key={active.id} quest={active} onQuit={() => setActive(null)} onDone={completeQuest} />
       ) : (
         <motion.div key="pick" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <h2 id="quest-title" className="font-display text-3xl leading-tight">
-              Micro quest
-            </h2>
-            <p className="text-ink-soft mt-2">A tiny challenge instead of a lecture about taking breaks.</p>
+          {/* Mochi hands you the quest rather than a panel announcing one. */}
+          <div className="mb-4 flex items-center gap-3">
+            <Companion expression="curious" size={54} float={false} />
+            <p className="bg-cream-deep/70 text-ink-soft rounded-2xl px-3.5 py-2 text-sm leading-snug">
+              {QUEST_INTRO[settings.personality]}
+            </p>
+          </div>
+
+          <h2 id="quest-title" className="font-display text-3xl leading-tight">
+            Micro quest
+          </h2>
+          <p className="text-ink-soft mt-2">A tiny challenge instead of a lecture about taking breaks.</p>
 
             {!showAll ? (
               <>

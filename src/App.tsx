@@ -3,8 +3,8 @@ import { MotionConfig } from 'framer-motion'
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 
 import { BrainDump } from './components/BrainDump'
-import { CompanionPrompt } from './components/CompanionPrompt'
 import { Layout } from './components/Layout'
+import { MochiLayer } from './components/mochi/MochiLayer'
 import { MicroBreak } from './components/MicroBreak'
 import { MicroQuest } from './components/MicroQuest'
 import { RewardCard } from './components/RewardCard'
@@ -14,13 +14,16 @@ import { Settings } from './pages/Settings'
 import { StoreProvider, useStore } from './state/store'
 
 /**
- * Every interruption is a modal layered over whatever page you were on, so
- * nothing you were doing is ever thrown away by a nudge.
+ * Mochi is not in here.
+ *
+ * These are the full interactions — dump, break, quest, reward — and they
+ * are modals on purpose: once you've chosen to do one, it should have your
+ * attention. Mochi's own nudge is deliberately *not* a modal; it lives in
+ * <MochiLayer> and never blocks the page.
  */
 function Overlays() {
   return (
     <>
-      <CompanionPrompt />
       <BrainDump />
       <MicroBreak />
       <MicroQuest />
@@ -84,6 +87,7 @@ export default function App() {
           </Routes>
         </Layout>
         <Overlays />
+        <MochiLayer />
       </Motion>
     </StoreProvider>
   )

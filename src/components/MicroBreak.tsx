@@ -2,9 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
 import { Button, SectionLabel, Sheet } from './ui'
+import { Companion } from './Companion'
 import { MICRO_BREAKS, type MicroBreak as Break } from '../data/breaks'
-import { CALM_QUOTES } from '../data/messages'
+import { BREAK_INTRO, CALM_QUOTES, RESET_DONE } from '../data/messages'
 import { useStore } from '../state/store'
+import type { Personality } from '../types'
 
 const ACCENT_RING: Record<string, string> = {
   sky: 'from-sky-soft to-sky/50',
@@ -35,13 +37,16 @@ export function MicroBreak() {
           key={chosen.id}
           plan={chosen}
           reducedMotion={settings.reducedMotion}
+          personality={settings.personality}
           onQuit={() => setChosen(null)}
           onDone={() => {
             markReset()
             reward({ mind: 1, body: 1, xp: 6 }, 'break')
+            const cheer = RESET_DONE[settings.personality]
             open({
               kind: 'reward',
               title: 'Reset complete',
+              mochiLine: cheer[Math.floor(Math.random() * cheer.length)],
               lines: [`${chosen.title} — done.`, 'Nothing else is required of you right now.'],
             })
           }}
@@ -83,16 +88,21 @@ export function MicroBreak() {
   )
 }
 
+/** The breaks where Mochi copying you actually makes sense. */
+const PHYSICAL: Break['id'][] = ['shoulders', 'movement']
+
 function BreakRunner({
   plan,
   onDone,
   onQuit,
   reducedMotion,
+  personality,
 }: {
   plan: Break
   onDone: () => void
   onQuit: () => void
   reducedMotion: boolean
+  personality: Personality
 }) {
   // A single elapsed counter, with the current step derived from it. Keeping
   // the only piece of state a pure increment means StrictMode's double
@@ -156,6 +166,22 @@ function BreakRunner({
           {step.detail && <p className="text-ink-soft mt-1.5 text-xs">{step.detail}</p>}
         </div>
       </div>
+
+      {/* Mochi does the exercise with you. Only for the ones where copying a
+          small round creature is actually useful — nobody needs Mochi to
+          demonstrate looking out of a window. */}
+      {PHYSICAL.includes(plan.id) && (
+        <div className="mt-4 flex items-center justify-center gap-3">
+          <Companion
+            expression={step.motion === 'hold' || step.motion === 'in' ? 'stretch' : 'idle'}
+            size={52}
+            float={false}
+          />
+          <p className="bg-cream-deep/70 text-ink-soft rounded-2xl px-3.5 py-2 text-sm">
+            {BREAK_INTRO[personality]}
+          </p>
+        </div>
+      )}
 
       <p className="tabular text-ink-faint mt-5 text-sm" aria-live="polite">
         {remaining}s

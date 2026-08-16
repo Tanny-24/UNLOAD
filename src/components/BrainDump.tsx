@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 
 import { Companion } from './Companion'
 import { Button, Sheet } from './ui'
+import { DUMP_DONE, DUMP_INTRO } from '../data/messages'
 import { organizeDump } from '../services/ai'
 import { useStore } from '../state/store'
 
@@ -17,7 +18,7 @@ const EXAMPLE =
  * behaviour this screen exists to prevent.
  */
 export function BrainDump() {
-  const { interruption, close, open, applyOrganize, aiStatus } = useStore()
+  const { interruption, close, open, applyOrganize, aiStatus, settings } = useStore()
   const [text, setText] = useState('')
   const [state, setState] = useState<'idle' | 'thinking' | 'error'>('idle')
   const areaRef = useRef<HTMLTextAreaElement>(null)
@@ -43,6 +44,7 @@ export function BrainDump() {
       open({
         kind: 'reward',
         title: 'Brain unloaded',
+        mochiLine: DUMP_DONE[settings.personality],
         lines: [
           result.summary,
           // Can be empty if everything in the dump was filtered out.
@@ -100,6 +102,14 @@ export function BrainDump() {
           </motion.div>
         ) : (
           <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            {/* Mochi stays in the room rather than handing you off to a form. */}
+            <div className="mb-4 flex items-center gap-3">
+              <Companion expression="curious" size={54} float={false} />
+              <p className="bg-cream-deep/70 text-ink-soft rounded-2xl px-3.5 py-2 text-sm leading-snug">
+                {DUMP_INTRO[settings.personality]}
+              </p>
+            </div>
+
             <h2 id="dump-title" className="font-display text-3xl leading-tight text-balance">
               What's taking up space in your head?
             </h2>

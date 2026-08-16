@@ -19,22 +19,32 @@ that 25 minutes elapsed.
 
 UNLOAD tries to notice the difference.
 
-It watches the *shape* of your interaction — not what you type, not your
-screen, not your face — and when that shape starts to look like being stuck,
-a small companion called **Mochi** turns up and offers you a way out:
+A small creature called **Mochi** lives in your workspace. It wanders the
+empty margins of the window, sits, stretches, yawns, and dozes off — quiet
+enough to work alongside and ignore.
+
+Meanwhile UNLOAD watches the *shape* of your interaction — not what you
+type, not your screen, not your face. When that shape starts to look like
+being stuck, Mochi stops, notices, walks over, and says something:
 
 ```
-              🧸
-
-     "Hey… brain buffering?"
-
-    You have been working for 55 minutes.
-
-        [  🧠 Unload         ]
-        [ 🧘 Tiny break ] [ 🎮 Micro quest ]
-
-           I'm good  ·  Snooze 10 min
+                      ┌────────────────────────────┐
+                      │ Hey… brain buffering?      │
+                      │ You've been working for    │
+                      │ 55 minutes.                │
+                      │                            │
+                      │ [     🧠 Unload         ]  │
+                      │ [ 🧘 Break ] [ 🎮 Quest ]  │
+                      │                            │
+                      │  I'm good · Snooze 10 min  │
+                      └─────────────┬──────────────┘
+                                    ▼
+                                   🧸
 ```
+
+Crucially this is **not** a modal. The page is never dimmed, focus is never
+stolen, and you can carry on typing straight through it. It is a companion
+speaking, not a notification demanding.
 
 Choose **Unload** and you get a big empty box. Type everything that is
 rattling around, unpunctuated and out of order. UNLOAD turns it into a
@@ -62,14 +72,14 @@ Two problems, one product:
 
 | | |
 |---|---|
-| 🧸 **Mochi, the companion** | An SVG desk creature with idle float, blinking, four expressions and four personalities (Calm, Chaotic, Nerd, Zen). Appears when you might be stuck; leaves the moment you say you're fine. |
+| 🧸 **Mochi, the roaming companion** | An SVG desk creature that actually lives in the window. Wanders between safe spots in the margins, sits, looks around, stretches, yawns, sleeps, and returns to its corner. Eight expressions, five personalities (Calm, Cozy, Chaotic, Nerd, Zen). Notices → approaches → speaks → goes back to pottering. |
 | 📊 **Stuckness detection** | A transparent four-signal heuristic over interaction metadata, scored 0–100 and classified Clear / Loaded / Might be stuck / Probably overloaded. Every component is visible in Settings. |
 | 🧠 **Brain dump → Parking Lot** | Free-form dump, organised into prioritised items with exactly one in the FOCUS NOW lane. Change priority, promote, park, complete, delete, add. Persists locally. |
 | 🧘 **Micro breaks** | Five guided 30–60 second resets: four breaths, shoulder reset, eye reset, stand and move, one quiet line. |
 | 🎮 **Micro quests** | Six tiny challenges with rewards — Yoda Reset, 20-Second Distance, Mini Walk, Four Breaths, Mental Clear, Glass of Water. Mental Clear writes straight back into your parking lot. |
 | 🎯 **Focus mode** | One goal, one timer, and a manual **I'm stuck** button so you are never dependent on the detector firing. |
 | 🎬 **Demo mode** | Replay a work pattern instead of waiting an hour for one. |
-| ♿ **Accessible** | Full keyboard navigation, focus trapping, visible focus rings, reduced-motion toggle, no colour-only information, text alternatives for everything Mochi says. |
+| ♿ **Accessible** | Full keyboard navigation, focus trapping in modals, visible focus rings, no colour-only information, text alternatives for everything Mochi says. Reduced motion parks Mochi in its corner and drops the approach animation entirely; Mochi can also be switched off completely without losing a single feature. |
 
 ## Privacy
 
@@ -193,8 +203,12 @@ UNLOAD/
 │       ├── index.js          # provider abstraction (anthropic | openai)
 │       └── prompt.js         # system prompt + JSON validation
 ├── src/
-│   ├── components/           # Companion, BrainDump, ParkingLot, MicroBreak,
-│   │                         # MicroQuest, CompanionPrompt, RewardCard, …
+│   ├── components/
+│   │   ├── mochi/
+│   │   │   ├── MochiLayer.tsx       # the click-through layer Mochi lives in
+│   │   │   └── useMochiBehavior.ts  # roaming state machine + safe positions
+│   │   └── …                 # Companion, BrainDump, ParkingLot, MicroBreak,
+│   │                         # MicroQuest, RewardCard, …
 │   ├── pages/                # Home, Focus, Settings
 │   ├── services/
 │   │   ├── activity.ts       # activity engine + stuckness scoring + demo
@@ -288,17 +302,18 @@ computed, not faked.
 
 ### The two-minute demo
 
-1. Open UNLOAD. Dashboard, companion, privacy note.
-2. **Focus → "Finish assignment" → Start.** Timer running.
-3. **Settings → 55 minutes deep.** You land back in Focus and Mochi appears
-   over it: *"Hey… brain buffering?"*
+1. Open UNLOAD. Dashboard, privacy note, and Mochi pottering about in the margin.
+2. **Focus → "Finish assignment" → Start.** Timer running, Mochi still wandering.
+3. **Settings → 55 minutes deep.** You land back in Focus. Mochi stops, its
+   ears go up, it walks over and says: *"Hey… brain buffering?"*
 4. Click **🧠 Unload**. Type:
    *"I need to finish my assignment, reply to my professor, study for tomorrow's exam and buy groceries."*
 5. **Unload my brain.** → FOCUS NOW: *Study for tomorrow's exam*, everything else parked.
 6. **Back to focus.**
 7. Click **I'm stuck** → Mochi returns → **🎮 Micro quest**.
 8. Accept **Yoda Reset**, hold for 15 seconds, **Mark complete**.
-9. **Quest complete ✓** — mind, body and XP tick up.
+9. **Quest complete ✓** — mind, body and XP tick up, Mochi celebrates, then
+   quietly goes back to wandering.
 
 Under two minutes, and every step works with no API key and no network.
 

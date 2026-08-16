@@ -61,7 +61,7 @@ export interface ActivityBucket {
   mouse: number
 }
 
-export type Personality = 'calm' | 'chaotic' | 'nerd' | 'zen'
+export type Personality = 'calm' | 'cozy' | 'chaotic' | 'nerd' | 'zen'
 
 export interface Settings {
   name: string
@@ -74,7 +74,30 @@ export interface Settings {
   soundOn: boolean
   demoMode: boolean
   focusMinutes: number
+  /** Whether Mochi lives in the workspace at all. */
+  mochiVisible: boolean
+  /** Whether Mochi wanders. Off = Mochi stays put in its corner. */
+  mochiRoams: boolean
 }
+
+/**
+ * What Mochi is doing right now.
+ *
+ * Deliberately separate from `StuckLevel`: the score says how loaded the
+ * person might be, this says which pose is on screen. One drives the other,
+ * but they change on completely different timescales.
+ */
+export type MochiPose =
+  | 'walk'
+  | 'idle'
+  | 'sit'
+  | 'look'
+  | 'stretch'
+  | 'yawn'
+  | 'sleep'
+  | 'alert'
+  | 'talk'
+  | 'cheer'
 
 export interface Stats {
   /** ISO date (YYYY-MM-DD) these daily counters belong to. */
@@ -105,4 +128,5 @@ export type Interruption =
   | { kind: 'dump' }
   | { kind: 'break' }
   | { kind: 'quest' }
-  | { kind: 'reward'; title: string; lines: string[] }
+  /** `mochiLine` is what the companion says about it, in a speech bubble. */
+  | { kind: 'reward'; title: string; lines: string[]; mochiLine?: string }

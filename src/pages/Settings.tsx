@@ -93,6 +93,21 @@ export function Settings() {
           />
         </div>
 
+        <div className="mt-5 space-y-4">
+          <Toggle
+            label="Let Mochi live in the workspace"
+            hint="Mochi wanders the edges of the screen while you work. Off means no companion on screen at all — everything else keeps working."
+            checked={settings.mochiVisible}
+            onChange={(v) => setSettings({ mochiVisible: v })}
+          />
+          <Toggle
+            label="Mochi animations"
+            hint="Wandering, stretching, yawning and dozing. Off means Mochi stays quietly in its corner."
+            checked={settings.mochiRoams}
+            onChange={(v) => setSettings({ mochiRoams: v })}
+          />
+        </div>
+
         <fieldset className="mt-6">
           <legend className="text-sm font-medium">Personality</legend>
           <div className="mt-2.5 grid gap-2.5 sm:grid-cols-2">

@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
 import { Companion } from './Companion'
-import { Button, Sheet } from './ui'
+import { Button, Sheet, SpeechBubble } from './ui'
 import { SUPPORT_NOTE } from '../services/ai'
 import { useStore } from '../state/store'
 
@@ -19,6 +19,7 @@ export function RewardCard() {
   const visible = interruption.kind === 'reward'
   const title = interruption.kind === 'reward' ? interruption.title : ''
   const lines = interruption.kind === 'reward' ? interruption.lines : []
+  const mochiLine = interruption.kind === 'reward' ? interruption.mochiLine : undefined
 
   const focus = items.find((i) => i.lane === 'focus' && !i.done)
 
@@ -35,6 +36,13 @@ export function RewardCard() {
         <div className="flex justify-center">
           <Companion expression={supportNote ? 'idle' : 'happy'} size={140} enter />
         </div>
+
+        {/* Mochi gets the first word — but never over the support note. */}
+        {mochiLine && !supportNote && (
+          <SpeechBubble className="mt-2">
+            <p className="font-display text-lg leading-snug">{mochiLine}</p>
+          </SpeechBubble>
+        )}
 
         {supportNote && (
           <div className="bg-sky-soft/45 border-sky/25 mt-4 rounded-2xl border px-4 py-3.5 text-left">

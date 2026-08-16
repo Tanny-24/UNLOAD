@@ -50,6 +50,8 @@ export const DEFAULT_SETTINGS: Settings = {
   soundOn: false,
   demoMode: false,
   focusMinutes: 25,
+  mochiVisible: true,
+  mochiRoams: true,
 }
 
 export const emptyStats = (): Stats => ({
