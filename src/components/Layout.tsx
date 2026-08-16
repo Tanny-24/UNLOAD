@@ -58,7 +58,13 @@ export function Layout({ children }: { children: ReactNode }) {
             <span className="text-ink-faint hidden text-xs sm:inline">unload your mind</span>
           </div>
 
-          <nav aria-label="Main" className="bg-paper/70 flex items-center gap-1 rounded-full p-1 backdrop-blur-sm">
+          {/* On narrow screens the nav drops to its own centred row, so the
+              logo and status pills share the first line instead of stacking
+              into a three-deep header. */}
+          <nav
+            aria-label="Main"
+            className="bg-paper/70 order-last flex w-full items-center justify-center gap-1 rounded-full p-1 sm:order-none sm:w-auto"
+          >
             {LINKS.map((link) => (
               <NavLink
                 key={link.to}

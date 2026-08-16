@@ -62,10 +62,11 @@ const NUDGE: Record<Personality, Record<StuckLevel, string[]>> = {
 /** The smaller line underneath — always factual, never interpretive. */
 export function subLine(minutes: number, level: StuckLevel): string {
   const m = Math.max(1, Math.round(minutes))
-  if (level === 'overloaded') return `${m} minutes without a proper pause.`
-  if (level === 'stuck') return `You have been working for ${m} minutes.`
-  if (level === 'loaded') return `${m} minutes in.`
-  return `${m} minutes in, and everything looks fine.`
+  const mins = `${m} ${m === 1 ? 'minute' : 'minutes'}`
+  if (level === 'overloaded') return `${mins} without a proper pause.`
+  if (level === 'stuck') return `You have been working for ${mins}.`
+  if (level === 'loaded') return `${mins} in.`
+  return `${mins} in, and everything looks fine.`
 }
 
 export function nudgeLine(personality: Personality, level: StuckLevel, seed = Date.now()): string {

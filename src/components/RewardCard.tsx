@@ -30,18 +30,27 @@ export function RewardCard() {
   return (
     <Sheet open={visible} onClose={close} labelledBy="reward-title" width="max-w-md">
       <div className="text-center">
+        {/* Celebration is wrong when the support note is showing. Same screen,
+            quieter face, no tick, note first. */}
         <div className="flex justify-center">
-          <Companion expression="happy" size={140} enter />
+          <Companion expression={supportNote ? 'idle' : 'happy'} size={140} enter />
         </div>
+
+        {supportNote && (
+          <div className="bg-sky-soft/45 border-sky/25 mt-4 rounded-2xl border px-4 py-3.5 text-left">
+            <p className="text-sm leading-relaxed text-[#245c82]">{supportNote}</p>
+          </div>
+        )}
 
         <motion.h2
           id="reward-title"
-          className="font-display mt-3 text-3xl"
+          className="font-display mt-4 text-3xl"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.16 }}
         >
-          {title} ✓
+          {title}
+          {supportNote ? '' : ' ✓'}
         </motion.h2>
 
         <motion.div
@@ -56,12 +65,6 @@ export function RewardCard() {
             </p>
           ))}
         </motion.div>
-
-        {supportNote && (
-          <div className="bg-sky-soft/45 border-sky/25 mt-5 rounded-2xl border px-4 py-3.5 text-left">
-            <p className="text-sm leading-relaxed text-[#245c82]">{supportNote}</p>
-          </div>
-        )}
 
         <motion.div
           className="bg-cream-deep/50 mt-6 flex items-center justify-center gap-6 rounded-2xl py-3.5"

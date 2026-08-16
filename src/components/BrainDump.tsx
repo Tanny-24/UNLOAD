@@ -45,7 +45,8 @@ export function BrainDump() {
         title: 'Brain unloaded',
         lines: [
           result.summary,
-          `One thing to focus on: ${result.recommended_focus}`,
+          // Can be empty if everything in the dump was filtered out.
+          ...(result.recommended_focus ? [`One thing to focus on: ${result.recommended_focus}`] : []),
           ...(result.supportNote ? [result.supportNote] : []),
         ],
       })

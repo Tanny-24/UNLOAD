@@ -94,7 +94,9 @@ export function CompanionPrompt() {
             </div>
 
             <p className="text-ink-faint mt-4 text-xs">
-              Noticed from activity timing only — {score}/100. Nothing you typed was read.
+              {reason === 'manual'
+                ? 'You called — no detection involved. Nothing you type is ever read.'
+                : `Noticed from activity timing only — ${score}/100. Nothing you typed was read.`}
             </p>
           </>
         )}

@@ -37,8 +37,28 @@ export async function fetchAiStatus(): Promise<AiStatus> {
   }
 }
 
+/**
+ * A sentence about wanting to die must never come back as a task with a
+ * priority chip next to it. When the safety check fires, those clauses are
+ * dropped from the list entirely — the practical items are still organised,
+ * and the support note carries the rest.
+ */
+function stripCrisisItems(result: OrganizeResult): OrganizeResult {
+  const items = result.items.filter((item) => !isCrisisText(item.text))
+  if (items.length === result.items.length) return result
+
+  const focusStillPresent = items.some((i) => i.text === result.recommended_focus)
+  return {
+    ...result,
+    items,
+    recommended_focus: focusStillPresent ? result.recommended_focus : (items[0]?.text ?? ''),
+  }
+}
+
 export async function organizeDump(text: string): Promise<OrganizeResult> {
   const supportNote = safetyNoteFor(text)
+  const finish = (result: OrganizeResult): OrganizeResult =>
+    supportNote ? { ...stripCrisisItems(result), supportNote } : result
 
   try {
     const res = await fetch('/api/organize', {
@@ -51,20 +71,19 @@ export async function organizeDump(text: string): Promise<OrganizeResult> {
     if (res.ok) {
       const data = await res.json()
       if (data?.ok && Array.isArray(data.items) && data.items.length > 0) {
-        return {
+        return finish({
           summary: data.summary,
           items: data.items,
           recommended_focus: data.recommended_focus,
           source: data.source ?? 'local',
-          supportNote,
-        }
+        })
       }
     }
   } catch {
     // Timeout, offline, server down — all handled the same way.
   }
 
-  return { ...organizeLocally(text), supportNote }
+  return finish(organizeLocally(text))
 }
 
 /* ------------------------------------------------------------------ */
@@ -102,7 +121,11 @@ const CRISIS_PHRASES = [
 export const SUPPORT_NOTE =
   'Some of what you wrote sounds heavier than a to-do list. UNLOAD is a small desk tool, not a substitute for a person — please consider talking to someone you trust, your GP or student wellbeing service, or a local crisis line. In the US and Canada you can call or text 988; in the UK and Ireland, call 116 123. If you are in immediate danger, please contact emergency services.'
 
-export function safetyNoteFor(text: string): string | undefined {
+export function isCrisisText(text: string): boolean {
   const lower = ` ${text.toLowerCase().replace(/\s+/g, ' ')} `
-  return CRISIS_PHRASES.some((phrase) => lower.includes(phrase)) ? SUPPORT_NOTE : undefined
+  return CRISIS_PHRASES.some((phrase) => lower.includes(phrase))
+}
+
+export function safetyNoteFor(text: string): string | undefined {
+  return isCrisisText(text) ? SUPPORT_NOTE : undefined
 }
