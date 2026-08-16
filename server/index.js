@@ -30,23 +30,18 @@ app.use(express.json({ limit: '64kb' }))
 /** Which provider is actually usable right now. */
 function resolveProvider() {
   const declared = (process.env.AI_PROVIDER ?? '').trim().toLowerCase()
-  const hasAnthropic = Boolean(process.env.ANTHROPIC_API_KEY?.trim())
   const hasOpenAI = Boolean(process.env.OPENAI_API_KEY?.trim())
 
-  if (declared === 'anthropic' && hasAnthropic) return 'anthropic'
   if (declared === 'openai' && hasOpenAI) return 'openai'
   if (declared === 'local') return 'local'
 
-  // No explicit choice: use whatever key happens to be present.
-  if (!declared) {
-    if (hasAnthropic) return 'anthropic'
-    if (hasOpenAI) return 'openai'
-  }
+  // No explicit choice: use a key if one happens to be present.
+  if (!declared && hasOpenAI) return 'openai'
+
   return 'local'
 }
 
 function modelFor(provider) {
-  if (provider === 'anthropic') return process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-5'
   if (provider === 'openai') return process.env.OPENAI_MODEL ?? 'gpt-4o-mini'
   return null
 }

@@ -28,7 +28,7 @@ export interface OrganizeResult {
   items: { text: string; priority: Priority; category: Category }[]
   recommended_focus: string
   /** Which path produced this — surfaced in the UI so it's never a mystery. */
-  source: 'anthropic' | 'openai' | 'local'
+  source: 'openai' | 'local'
   /** Set when the dump mentioned something that deserves a human, not an app. */
   supportNote?: string
 }

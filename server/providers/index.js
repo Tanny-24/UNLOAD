@@ -1,9 +1,9 @@
 /**
  * Provider abstraction.
  *
- * Every provider is just: (text) -> raw string. Parsing, validation and
- * repair are shared, so adding a provider means adding one function here
- * and one branch in `organize`.
+ * A provider is just: (model, text) -> raw string. Parsing, validation and
+ * repair are shared below, so adding another one means adding a single
+ * function here and a branch in `organize`.
  */
 import { SYSTEM_PROMPT, extractJson, normalise } from './prompt.js'
 
@@ -29,23 +29,6 @@ async function postJson(url, headers, body) {
   }
 }
 
-async function callAnthropic(model, text) {
-  const data = await postJson(
-    'https://api.anthropic.com/v1/messages',
-    {
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    {
-      model,
-      max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: text }],
-    },
-  )
-  return data?.content?.map((block) => block?.text ?? '').join('') ?? ''
-}
-
 async function callOpenAI(model, text) {
   const data = await postJson(
     'https://api.openai.com/v1/chat/completions',
@@ -64,14 +47,7 @@ async function callOpenAI(model, text) {
 }
 
 export async function organize({ provider, model, text }) {
-  const raw =
-    provider === 'anthropic'
-      ? await callAnthropic(model, text)
-      : provider === 'openai'
-        ? await callOpenAI(model, text)
-        : (() => {
-            throw new Error(`unknown provider: ${provider}`)
-          })()
+  if (provider !== 'openai') throw new Error(`unknown provider: ${provider}`)
 
-  return normalise(extractJson(raw))
+  return normalise(extractJson(await callOpenAI(model, text)))
 }

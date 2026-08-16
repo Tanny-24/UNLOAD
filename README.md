@@ -185,10 +185,10 @@ be stuck"*, and it shows you the four numbers behind that guess.
 ┌─────────────────────────▼───────────────────────────────────┐
 │  LOCAL NODE PROCESS  ·  localhost:8787                       │
 │  Express proxy — holds the API key, stores nothing           │
-│  providers/ → anthropic | openai                             │
+│  providers/ → openai                                         │
 └─────────────────────────┼───────────────────────────────────┘
                           ▼
-                   Anthropic / OpenAI API
+                       OpenAI API
 ```
 
 Two processes, one command. No database, no auth, no cloud.
@@ -200,7 +200,7 @@ UNLOAD/
 ├── server/
 │   ├── index.js              # Express proxy: /api/status, /api/organize
 │   └── providers/
-│       ├── index.js          # provider abstraction (anthropic | openai)
+│       ├── index.js          # provider abstraction (openai)
 │       └── prompt.js         # system prompt + JSON validation
 ├── src/
 │   ├── components/
@@ -268,7 +268,7 @@ npm run lint
 
 ## Environment variables
 
-Copy the example file and fill in whichever provider you have:
+Copy the example file and fill in a key if you have one:
 
 ```bash
 cp .env.example .env
@@ -276,9 +276,7 @@ cp .env.example .env
 
 | Variable | Purpose |
 |---|---|
-| `AI_PROVIDER` | `anthropic`, `openai`, or `local`. Leave blank to auto-detect from whichever key is set. |
-| `ANTHROPIC_API_KEY` | Anthropic key. Optional. |
-| `ANTHROPIC_MODEL` | Defaults to `claude-sonnet-5`. |
+| `AI_PROVIDER` | `openai` or `local`. Leave blank to auto-detect from whether a key is set. |
 | `OPENAI_API_KEY` | OpenAI key. Optional. |
 | `OPENAI_MODEL` | Defaults to `gpt-4o-mini`. |
 | `PORT` | Proxy port. Defaults to `8787`. |
