@@ -1,0 +1,174 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/inter';
+
+/* ---------------------------------------------------------------
+   UNLOAD design tokens
+   Cozy, warm, low-stimulation. Deliberately not a SaaS dashboard.
+   --------------------------------------------------------------- */
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces Variable', ui-serif, Georgia, serif;
+
+  /* surfaces */
+  --color-cream: #faf5ee;
+  --color-cream-deep: #f2e9dd;
+  --color-paper: #fffdfa;
+
+  /* ink */
+  --color-ink: #33302c;
+  --color-ink-soft: #6b6259;
+  --color-ink-faint: #9c9188;
+
+  /* accents */
+  --color-peach: #ff8a65;
+  --color-peach-soft: #ffd6c6;
+  --color-lilac: #a78bfa;
+  --color-lilac-soft: #e5dcff;
+  --color-mint: #4fbf9f;
+  --color-mint-soft: #cdefe4;
+  --color-butter: #f5b74e;
+  --color-butter-soft: #ffeac4;
+  --color-sky: #6cb6e8;
+  --color-sky-soft: #d7ecfb;
+
+  /* priority scale (never colour-only — always paired with a label) */
+  --color-prio-high: #ef6b5e;
+  --color-prio-medium: #f0a63c;
+  --color-prio-low: #8ba3b5;
+
+  --radius-card: 1.75rem;
+
+  --shadow-soft: 0 1px 2px rgb(80 60 40 / 0.04), 0 8px 24px -12px rgb(80 60 40 / 0.16);
+  --shadow-lift: 0 2px 4px rgb(80 60 40 / 0.05), 0 24px 48px -20px rgb(80 60 40 / 0.28);
+
+  --animate-breathe: breathe 4s ease-in-out infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-drift: drift 22s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(3%, -4%, 0) scale(1.08);
+  }
+  66% {
+    transform: translate3d(-3%, 3%, 0) scale(0.95);
+  }
+}
+
+/* ---------------------------------------------------------------
+   Base
+   --------------------------------------------------------------- */
+html {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: 'cv02', 'cv03', 'cv04';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Visible, on-brand focus ring for keyboard users everywhere. */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 3px solid var(--color-lilac);
+  outline-offset: 3px;
+  border-radius: 0.5rem;
+}
+
+::selection {
+  background: var(--color-peach-soft);
+  color: var(--color-ink);
+}
+
+/* ---------------------------------------------------------------
+   Reduced motion
+   Honoured two ways: the OS setting, and the in-app Settings toggle
+   which puts `data-calm="true"` on <html>. Both stop all animation.
+   --------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html[data-calm='true'] *,
+html[data-calm='true'] *::before,
+html[data-calm='true'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+/* ---------------------------------------------------------------
+   Small utilities used across the app
+   --------------------------------------------------------------- */
+@utility card {
+  background: var(--color-paper);
+  border-radius: var(--radius-card);
+  border: 1px solid rgb(120 96 72 / 0.09);
+  box-shadow: var(--shadow-soft);
+}
+
+@utility label-caps {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-faint);
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Screen-reader-only text */
+@utility sr-only-focusable {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Gentle scrollbars so long lists don't feel harsh */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-cream-deep) transparent;
+}
