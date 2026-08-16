@@ -10,14 +10,15 @@ import { useStore } from '../state/store'
 import type { Personality } from '../types'
 
 export function Settings() {
-  const { settings, setSettings, stuckness, aiStatus, runDemo, totals, open } = useStore()
+  const { settings, setSettings, stuckness, aiStatus, runDemo, totals, open, session } = useStore()
   const navigate = useNavigate()
   const [confirmErase, setConfirmErase] = useState(false)
 
   function demo(profile: DemoProfile) {
     // The companion is a modal, so get out of Settings first — otherwise the
-    // reveal happens on top of a page of switches.
-    navigate('/')
+    // reveal happens on top of a page of switches. If a session is running,
+    // land back in Focus, which is where the interruption actually belongs.
+    navigate(session.active ? '/focus' : '/')
     window.setTimeout(() => runDemo(profile), 260)
   }
 

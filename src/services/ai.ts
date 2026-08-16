@@ -55,10 +55,19 @@ function stripCrisisItems(result: OrganizeResult): OrganizeResult {
   }
 }
 
-export async function organizeDump(text: string): Promise<OrganizeResult> {
+/**
+ * @param mode  What `/api/status` reported at startup. When it already says
+ *              there is no model, we skip the request entirely rather than
+ *              firing one off to collect a 503 — a predictable red line in
+ *              the console on every single unload is not "working as
+ *              intended", it is noise that hides real errors.
+ */
+export async function organizeDump(text: string, mode: AiMode = 'model'): Promise<OrganizeResult> {
   const supportNote = safetyNoteFor(text)
   const finish = (result: OrganizeResult): OrganizeResult =>
     supportNote ? { ...stripCrisisItems(result), supportNote } : result
+
+  if (mode !== 'model') return finish(organizeLocally(text))
 
   try {
     const res = await fetch('/api/organize', {

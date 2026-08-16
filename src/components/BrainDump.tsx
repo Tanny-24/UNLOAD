@@ -38,7 +38,7 @@ export function BrainDump() {
 
     setState('thinking')
     try {
-      const result = await organizeDump(clean)
+      const result = await organizeDump(clean, aiStatus.mode)
       applyOrganize(result)
       open({
         kind: 'reward',
