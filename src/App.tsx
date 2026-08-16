@@ -8,6 +8,7 @@ import { MochiLayer } from './components/mochi/MochiLayer'
 import { MicroBreak } from './components/MicroBreak'
 import { MicroQuest } from './components/MicroQuest'
 import { RewardCard } from './components/RewardCard'
+import { DesktopBridge } from './desktop/DesktopBridge'
 import { Focus } from './pages/Focus'
 import { Home } from './pages/Home'
 import { Settings } from './pages/Settings'
@@ -88,6 +89,9 @@ export default function App() {
         </Layout>
         <Overlays />
         <MochiLayer />
+        {/* Mirrors Mochi onto the desktop window when running in the
+            Electron shell. No-op in a plain browser. */}
+        <DesktopBridge />
       </Motion>
     </StoreProvider>
   )

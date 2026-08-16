@@ -1,0 +1,18 @@
+@import './index.css';
+
+/* The pet window is frameless and transparent — the app's warm cream page
+   background would fill it with an opaque rectangle. */
+html,
+body,
+#pet {
+  background: transparent !important;
+  overflow: hidden;
+  /* No text selection or rubber-banding on something you drag around. */
+  user-select: none;
+  -webkit-user-select: none;
+  overscroll-behavior: none;
+}
+
+body {
+  cursor: default;
+}
